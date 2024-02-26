@@ -7,7 +7,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const http = require("http");
-const path = require("path")
+const path = require("path");
 
 const app = express();
 
@@ -15,7 +15,12 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://192.168.123.210:5173", "http://192.168.137.1:5173", "https://verdant-souffle-330245.netlify.app/"],
+    origin: [
+      "http://localhost:5173",
+      "http://192.168.123.210:5173",
+      "http://192.168.137.1:5173",
+      "https://verdant-souffle-330245.netlify.app/",
+    ],
     methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
   },
 });
@@ -27,10 +32,6 @@ io.on("connection", (socket) => {
 
   socket.on("sendMessage", (data) => {
     socket.broadcast.emit("receiveMessage", data);
-  });
-
-  socket.on("sendAvatar", (data) => {
-    socket.to(data.receiver).to(data.sender).emit("receiveAvatar", data);
   });
 
   socket.on("connectUser", (data) => {
@@ -45,22 +46,14 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("receiveInterested", data);
   });
 
-  socket.on("formAdd", (data) => {
-    socket.broadcast.emit("receiveForm", data);
-  });
-
-  socket.on("deleteForm", (data) => {
-    socket.broadcast.emit("receiveDelete", data);
-  });
 });
 
-pages.hasMany(products, { onDelete: "CASCADE", foreignKey: "pageId" });
 products.belongsTo(pages, { onDelete: "CASCADE", foreignKey: "pageId" });
 users.hasOne(sessions, { foreignKey: "userId" });
 sessions.belongsTo(users, { foreignKey: "userId" });
 
 db.sequelize.sync().then(() => {
-  server.listen(process.env.PORT, "0.0.0.0",() => {
+  server.listen(process.env.PORT, "0.0.0.0", () => {
     console.log(`http://127.0.0.1:${process.env.PORT}`);
   });
 });
@@ -70,13 +63,22 @@ app.use(express.static("./public/dist/"));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(
-  cors({
-    credentials: true,
-    origin: [`http://localhost:5173`, "http://192.168.123.210:5173", "http://192.168.137.1:5173", "https://verdant-souffle-330245.netlify.app/"],
-    methods: ["GET", "POST", "DELETE", "PUT"],
-  })
-);
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", req.get("Origin") || "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+  res.header("Access-Control-Expose-Headers", "Content-Length");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Accept, Authorization, Content-Type, X-Requested-With, Range"
+  );
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  } else {
+    return next();
+  }
+});
+app.use(cors({ credentials: true }));
 
 const refreshRoutes = require("./routes/Refresh.js");
 app.use("/refresh", refreshRoutes);
@@ -98,3 +100,7 @@ app.use("/log", logRoutes);
 
 const messageRoutes = require("./routes/Messages.js");
 app.use("/message", messageRoutes);
+
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
+});

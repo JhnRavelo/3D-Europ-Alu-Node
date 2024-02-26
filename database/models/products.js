@@ -1,6 +1,3 @@
-const users = require("./users");
-const trakers = require("./trakers");
-
 module.exports = (sequelize, DataTypes) => {
   const products = sequelize.define("products", {
     ID_product: {

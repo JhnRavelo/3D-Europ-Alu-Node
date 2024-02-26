@@ -39,5 +39,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
   });
+  pages.associate = (models) => {
+    pages.hasMany(models.products, {
+      onDelete: "CASCADE",
+      foreignKey: "pageId",
+    });
+  };
+
   return pages;
 };
