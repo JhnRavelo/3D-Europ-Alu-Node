@@ -143,7 +143,7 @@ const userLogin = async (req, res) => {
       });
     }
 
-    res.json({ role, accessToken });
+    res.json({ role, accessToken, success: true });
   } catch (error) {
     console.log(error);
   }
@@ -542,8 +542,6 @@ module.exports = {
   updateUser,
   deleteUser,
   getCommercials,
-  validationLogin,
-  validationRegister,
   uploadUserImage,
   avatarUpdateUser,
   updateProfile,

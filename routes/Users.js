@@ -11,8 +11,6 @@ const {
   updateUser,
   deleteUser,
   getCommercials,
-  validationLogin,
-  validationRegister,
   uploadUserImage,
   avatarUpdateUser,
   updateProfile,
@@ -43,10 +41,6 @@ const upload = multer({
 });
 
 const multipleField = upload.fields([{ name: "avatar" }]);
-
-router.post("/validationLogin", validationLogin);
-
-router.post("/validationRegister", validationRegister);
 
 router.post("/login", userLogin);
 
