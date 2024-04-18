@@ -7,15 +7,10 @@ handleRefreshToken = async (req, res) => {
     const cookie = await req.cookies;
 
     if (!cookie?.jwt) return res.sendStatus(401);
-
     const refreshToken = cookie.jwt;
-
     res.clearCookie("jwt", {
       httpOnly: true,
-      // sameSite: "None",
-      secure: true,
     });
-
     const user = await users.findOne({
       where: {
         refreshToken: refreshToken,
@@ -28,19 +23,19 @@ handleRefreshToken = async (req, res) => {
         process.env.REFRESH_TOKEN_SECRET,
         async (err, decoded) => {
           if (err) {
-            return res.sendStatus(403);
+            console.log("ERROR REFRESH HACKED USER", err);
           }
-          const hackedUser = await users.findOne({
-            where: {
-              ID_user: decoded.id,
-            },
-          });
-          console.log("hacked");
-          hackedUser.refreshToken = "";
-          await hackedUser.save();
+          if (decoded && decoded?.id) {
+            const hackedUser = await users.findOne({
+              where: {
+                ID_user: decoded?.id,
+              },
+            });
+            hackedUser.refreshToken = "";
+            await hackedUser.save();
+          }
         }
       );
-
       return res.sendStatus(403);
     }
 
@@ -54,7 +49,6 @@ handleRefreshToken = async (req, res) => {
         }
 
         if (err || user.ID_user !== decoded.id) return res.sendStatus(403);
-
         const id = user.ID_user,
           role = user.role,
           newRefreshToken = users.prototype.generateRefreshToken(decoded.id),
@@ -62,19 +56,23 @@ handleRefreshToken = async (req, res) => {
 
         user.refreshToken = newRefreshToken;
         await user.save();
-
         res.cookie("jwt", newRefreshToken, {
           httpOnly: true,
-          // sameSite: "None",
-          secure: true,
-          maxAge: 6 * 60 * 1000,
+          maxAge: 24 * 60 * 60 * 1000,
         });
-
-        res.json({ role, accessToken });
+        res.json({
+          role,
+          accessToken,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          phone: user.phone,
+          id: user.ID_user,
+        });
       }
     );
   } catch (error) {
-    console.log(error);
+    console.log("ERROR REFRESH", error);
   }
 };
 
