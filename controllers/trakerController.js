@@ -8,48 +8,42 @@ const addTraker = async (req, res) => {
     const { ID_user } = req.user;
     let response, isTraker;
 
-    if (checked && checked[0] !== "") {
-      checked.map(async (track) => {
-        var date = new Date();
-        var day = date.getDate();
-        var month = date.getMonth() + 1;
-        var year = date.getFullYear();
+    if (!checked && checked[0] == "") return res.json({ success: false });
+    checked.map(async (track) => {
+      var date = new Date();
+      var day = date.getDate();
+      var month = date.getMonth() + 1;
+      var year = date.getFullYear();
 
-        const product = await products.findOne({
-          where: {
-            title: track,
-          },
-        });
-
-        isTraker = await trakers.findOne({
-          where: {
-            userId: ID_user,
-            productId: product.ID_product,
-          },
-        });
-
-        if (!isTraker) {
-          response = await trakers.create({
-            date,
-            day,
-            month,
-            year,
-            userId: ID_user,
-            productId: product.ID_product,
-          });
-
-          await logs.create({
-            trakerId: response.id,
-          });
-        }
+      const product = await products.findOne({
+        where: {
+          title: track,
+        },
       });
-    }
 
-    if (response) {
-      return res.json("Produit ajouté");
-    } else {
-      return res.json("Produit déjà ajouté");
-    }
+      isTraker = await trakers.findOne({
+        where: {
+          userId: ID_user,
+          productId: product.ID_product,
+        },
+      });
+
+      if (!isTraker) {
+        response = await trakers.create({
+          date,
+          day,
+          month,
+          year,
+          userId: ID_user,
+          productId: product.ID_product,
+        });
+
+        await logs.create({
+          trakerId: response.id,
+        });
+      }
+    });
+    res.json({ success: true });
   } catch (error) {
     console.log(error);
   }
