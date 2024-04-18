@@ -15,12 +15,6 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "http://192.168.123.210:5173",
-      "http://192.168.137.1:5173",
-      "https://verdant-souffle-330245.netlify.app/",
-    ],
     methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
   },
 });
@@ -45,13 +39,13 @@ io.on("connection", (socket) => {
   socket.on("UserInterested", (data) => {
     socket.to(data.room).emit("receiveInterested", data);
   });
-
 });
 
 products.belongsTo(pages, { onDelete: "CASCADE", foreignKey: "pageId" });
 users.hasOne(sessions, { foreignKey: "userId" });
 sessions.belongsTo(users, { foreignKey: "userId" });
 
+db.sequelize.options.logging = false
 db.sequelize.sync().then(() => {
   server.listen(process.env.PORT, "0.0.0.0", () => {
     console.log(`http://127.0.0.1:${process.env.PORT}`);
@@ -78,7 +72,11 @@ app.use(function (req, res, next) {
     return next();
   }
 });
-app.use(cors({ credentials: true }));
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 
 const refreshRoutes = require("./routes/Refresh.js");
 app.use("/refresh", refreshRoutes);

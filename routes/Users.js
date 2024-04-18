@@ -5,7 +5,6 @@ const {
   userRegistration,
   userLogin,
   userLogout,
-  userRead,
   addUser,
   getUsers,
   updateUser,
@@ -52,8 +51,6 @@ router
   .put(multipleField, uploadUserImage);
 
 router.put("/avatar", verifyJWT, avatarUpdateUser);
-
-router.get("/", verifyJWT, userRead);
 
 router.get("/logout", verifyJWT, userLogout);
 
