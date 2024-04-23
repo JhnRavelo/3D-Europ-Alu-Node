@@ -174,7 +174,6 @@ const userLogout = async (req, res) => {
       });
       return res.sendStatus(204);
     }
-    console.log("vider");
     user.refreshToken = "";
     await user.save();
     res.clearCookie("jwt", {

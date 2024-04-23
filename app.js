@@ -6,18 +6,14 @@ const { users, products, pages, sessions } = require("./database/models");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
-const http = require("http");
+const https = require("http");
 const path = require("path");
 
 const app = express();
 
-const server = http.createServer(app);
+const server = https.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-  },
-});
+const io = new Server(server);
 
 io.on("connection", (socket) => {
   socket.on("joinRoom", (data) => {
@@ -47,31 +43,15 @@ sessions.belongsTo(users, { foreignKey: "userId" });
 
 db.sequelize.options.logging = false
 db.sequelize.sync().then(() => {
-  server.listen(process.env.PORT, "0.0.0.0", () => {
+  server.listen(process.env.PORT, () => {
     console.log(`http://127.0.0.1:${process.env.PORT}`);
   });
 });
 
 app.use(express.static("./public/dist/"));
-
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", req.get("Origin") || "*");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-  res.header("Access-Control-Expose-Headers", "Content-Length");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Accept, Authorization, Content-Type, X-Requested-With, Range"
-  );
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  } else {
-    return next();
-  }
-});
 app.use(
   cors({
     credentials: true,
