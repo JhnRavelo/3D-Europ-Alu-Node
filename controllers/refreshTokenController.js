@@ -60,7 +60,7 @@ handleRefreshToken = async (req, res) => {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
         });
-        res.json({
+        const user = {
           role,
           accessToken,
           name: user.name,
@@ -68,7 +68,8 @@ handleRefreshToken = async (req, res) => {
           avatar: user.avatar,
           phone: user.phone,
           id: user.ID_user,
-        });
+        }
+        res.json(user);
       }
     );
   } catch (error) {

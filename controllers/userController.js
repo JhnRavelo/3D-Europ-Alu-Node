@@ -60,15 +60,18 @@ const userRegistration = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
     });
-    res.json({
+    const user = {
       role,
       accessToken,
-      success: true,
       name: userRegister.name,
       email: userRegister.email,
       phone: userRegister.phone,
       avatar: userRegister.avatar,
       id: userRegister.ID_user,
+    };
+    res.json({
+      success: true,
+      user,
     });
   } catch (error) {
     console.log("ERROR USER REGISTER", error);
@@ -140,16 +143,18 @@ const userLogin = async (req, res) => {
         year,
       });
     }
-
-    res.json({
+    const user = {
       role,
       accessToken,
-      success: true,
       name: userName.name,
       email: userName.email,
       phone: userName.email,
       avatar: userName.avatar,
       id: userName.ID_user,
+    };
+    res.json({
+      success: true,
+      user,
     });
   } catch (error) {
     console.log("ERROR USER LOGIN", error);
