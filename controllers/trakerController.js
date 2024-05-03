@@ -1,6 +1,12 @@
-const { trakers, users, products, pages, logs } = require("../database/models");
+const {
+  trakers,
+  users,
+  products,
+  pages,
+  logs,
+  sessions,
+} = require("../database/models");
 const sequelize = require("sequelize");
-const { Op } = require("sequelize");
 
 const addTraker = async (req, res) => {
   try {
@@ -45,19 +51,12 @@ const addTraker = async (req, res) => {
     });
     res.json({ success: true });
   } catch (error) {
-    console.log(error);
+    console.log("ERROR ADD TRACKER", error);
   }
 };
 
 const getTraker = async (req, res) => {
   try {
-    const userRead = await users.findAll({
-      where: {
-        ID_user: req.user,
-      },
-      attributes: ["name", "email", "phone", "avatar", "ID_user"],
-    });
-
     const traker = await trakers.findAll({
       where: {
         userId: req.user,
@@ -70,9 +69,9 @@ const getTraker = async (req, res) => {
       ],
     });
 
-    res.json({ traker, userRead });
+    res.json(traker);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET TRACKER", error);
   }
 };
 
@@ -99,7 +98,7 @@ const getTrakers = async (req, res) => {
 
     res.json(allTrakers);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET TRACKER", error);
   }
 };
 
@@ -132,7 +131,7 @@ const getTopProduct = async (req, res) => {
 
     res.json(topProduct);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET TOP PRODUCT", error);
   }
 };
 
@@ -181,7 +180,7 @@ const nbrProdByTrack = async (req, res) => {
       order: ["pageId"],
     });
 
-    const getYear = await trakers.findAll({
+    const years = await sessions.findAll({
       attributes: ["year"],
       group: ["year"],
       order: ["year"],
@@ -192,10 +191,10 @@ const nbrProdByTrack = async (req, res) => {
       countProdInterested,
       countByMonthByYear,
       countProductByPageByMonth,
-      getYear,
+      years,
     });
   } catch (error) {
-    console.log(error);
+    console.log("ERROR NBR PROD BY TRACK", error);
   }
 };
 
@@ -241,7 +240,7 @@ const getProdByInterested = async (req, res) => {
 
     res.json({ countByMonthByYear, logSingleProductInterested });
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET PROD BY INTERESTED", error);
   }
 };
 

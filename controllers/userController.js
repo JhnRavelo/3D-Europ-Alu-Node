@@ -81,9 +81,7 @@ const userRegistration = async (req, res) => {
 const userLogin = async (req, res) => {
   try {
     const { loginMail, loginPassword } = await req.body;
-
     const cookie = req.cookies;
-
     const userName = await users.findOne({
       where: {
         email: {
@@ -125,11 +123,8 @@ const userLogin = async (req, res) => {
         });
       }
     }
-
     userName.refreshToken = newRefreshToken;
-
     await userName.save();
-
     res.cookie("jwt", newRefreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
@@ -148,7 +143,7 @@ const userLogin = async (req, res) => {
       accessToken,
       name: userName.name,
       email: userName.email,
-      phone: userName.email,
+      phone: userName.phone,
       avatar: userName.avatar,
       id: userName.ID_user,
     };

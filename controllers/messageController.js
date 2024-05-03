@@ -6,30 +6,25 @@ const addMessage = async (req, res) => {
   try {
     const { sender, receiver, text } = await req.body;
 
+    if (!sender || !receiver || !text) return res.sendStatus(401);
     let img, message;
+
     if (req?.files?.file) {
       if (req.files.file[0].mimetype.split("/")[0] == "image") {
         img = `/img/file/${req.files.file[0].filename}`;
       }
     }
+    message = await messages.create({
+      sender,
+      receiver,
+      text,
+      img: img ? img : "",
+    });
 
-    if ((sender, receiver, text)) {
-      message = await messages.create({
-        sender,
-        receiver,
-        text,
-      });
-
-      if (img) message.img = img;
-
-      await message.save();
-
-      if (message) {
-        res.json("message envoyé");
-      }
-    }
+    if (!message) return res.sendStatus(401);
+    res.sendStatus(200);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR ADD MESSAGE", error);
   }
 };
 
@@ -37,9 +32,7 @@ const getMessage = async (req, res) => {
   try {
     const { receiver } = await req.body;
 
-    if (!receiver || receiver == null || receiver == undefined)
-      return res.json("No sender");
-
+    if (!receiver) return res.sendStatus(403);
     const getMessages = await messages.findAll({
       where: {
         [Op.or]: [
@@ -73,7 +66,6 @@ const getMessage = async (req, res) => {
       ],
       order: [[Sequelize.col("messages.createdAt"), "ASC"]],
     });
-
     await messages.update(
       { unRead: false },
       {
@@ -83,16 +75,15 @@ const getMessage = async (req, res) => {
         },
       }
     );
-
     res.json(getMessages);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET MESSAGE", error);
   }
 };
 
 const getLastMessage = async (req, res) => {
   try {
-    const lastMessage = await messages.findAll({
+    const lastMessages = await messages.findAll({
       where: {
         [Op.or]: [{ sender: req.user }, { receiver: req.user }],
       },
@@ -110,10 +101,9 @@ const getLastMessage = async (req, res) => {
       ],
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
-
-    res.json(lastMessage);
+    res.json(lastMessages);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET LAST MESSAGE", error);
   }
 };
 
@@ -137,8 +127,8 @@ const getUsers = async (req, res) => {
       ],
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
-
     const allUserAvecDoublons = user.map((item) => {
+
       if (item.send.ID_user == req.user) {
         return {
           ID_user: item.receive.ID_user,
@@ -160,26 +150,15 @@ const getUsers = async (req, res) => {
 
     allUserAvecDoublons.forEach((objet) => {
       const cleObjet = `${objet.ID_user}`;
+
       if (!objetsUniques.has(cleObjet)) {
         objetsUniques.add(cleObjet);
         allUser.push(objet);
       }
     });
-
-    const use = await users.findAll({
-      include: [
-        {
-          model: messages,
-        },
-      ],
-      where: {
-        role: process.env.PRIME3,
-      },
-    });
-
     res.json(allUser);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET USERS", error);
   }
 };
 
@@ -206,10 +185,9 @@ const getMessageNotif = async (req, res) => {
       group: ["sender"],
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
-
     res.json(receiveMessage);
   } catch (error) {
-    console.log(error);
+    console.log("ERROR GET MESSAGE NOTIFICATION", error);
   }
 };
 
