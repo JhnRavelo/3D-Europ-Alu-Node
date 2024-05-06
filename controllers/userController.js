@@ -4,11 +4,6 @@ require("dotenv").config();
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
-var date = new Date();
-var day = date.getDate();
-var month = date.getMonth() + 1;
-var year = date.getFullYear();
-
 const userRegistration = async (req, res) => {
   try {
     const { name, email, phone, password, typeUser } = await req.body;
@@ -35,7 +30,6 @@ const userRegistration = async (req, res) => {
       role = userRegister.role,
       refreshToken = users.prototype.generateRefreshToken(id),
       accessToken = users.prototype.generateToken(id, role);
-
     userRegister.refreshToken = refreshToken;
     const result = await userRegister.save();
 
@@ -44,6 +38,10 @@ const userRegistration = async (req, res) => {
         success: false,
         message: "Utilisateur non enregistré",
       });
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
 
     if (userRegister.role == process.env.PRIME3) {
       await sessions.create({
@@ -96,7 +94,6 @@ const userLogin = async (req, res) => {
         message: "L'utilisateur n'est pas enregistré",
       });
     }
-
     const match = await bcrypt.compare(loginPassword, userName.password);
 
     if (!match) {
@@ -104,7 +101,6 @@ const userLogin = async (req, res) => {
     }
     const id = userName.ID_user;
     const role = userName.role;
-
     let newRefreshToken = users.prototype.generateRefreshToken(id);
     const accessToken = users.prototype.generateToken(id, role);
 
@@ -129,6 +125,10 @@ const userLogin = async (req, res) => {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
 
     if (userName.role == process.env.PRIME3) {
       await sessions.create({
@@ -217,12 +217,8 @@ const addUser = async (req, res) => {
       }
       const result = await userAdd.save();
 
-      if (result) {
-        if (userAdd.role == process.env.PRIME3) {
-          await sessions.create({ userId: userAdd.ID_user, day, month, year });
-        }
-        res.json(`Utilisateur ajouté`);
-      }
+      if (!result) return res.sendStatus(401);
+      res.json(`Utilisateur ajouté`);
     }
   } catch (error) {
     console.log("ERROR ADD USER", error);
