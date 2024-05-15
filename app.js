@@ -21,7 +21,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
-    socket.broadcast.emit("receiveMessage", data);
+    socket.to(data.sender).to(data.receiver).emit("receiveMessage", data);
   });
 
   socket.on("connectUser", (data) => {
@@ -41,7 +41,7 @@ products.belongsTo(pages, { onDelete: "CASCADE", foreignKey: "pageId" });
 users.hasOne(sessions, { foreignKey: "userId" });
 sessions.belongsTo(users, { foreignKey: "userId" });
 
-db.sequelize.options.logging = false
+db.sequelize.options.logging = false;
 db.sequelize.sync().then(() => {
   server.listen(process.env.PORT, () => {
     console.log(`http://127.0.0.1:${process.env.PORT}`);
