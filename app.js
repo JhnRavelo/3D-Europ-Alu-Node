@@ -13,7 +13,7 @@ const app = express();
 
 const server = https.createServer(app);
 
-const io = new Server(server);
+const io = new Server(server, {cors: {origin: "http://localhost:5173"}});
 
 io.on("connection", (socket) => {
   socket.on("joinRoom", (data) => {
@@ -55,6 +55,7 @@ app.use(bodyParser.json());
 app.use(
   cors({
     credentials: true,
+    origin: "http://localhost:5173",
   })
 );
 
