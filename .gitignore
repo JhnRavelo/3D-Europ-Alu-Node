@@ -3,3 +3,4 @@ node_modules
 public/dist
 controllers/refreshTokenController.js
 routes/Refresh.js
+database/config/config.json
