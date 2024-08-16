@@ -1,27 +1,65 @@
+const FileHandler = require("../class/FileHandler");
 const { messages, users } = require("../database/models");
 const { Op, Sequelize } = require("sequelize");
 require("dotenv").config();
+const path = require("path");
+
+const photoPath = path.join(
+  __dirname,
+  "..",
+  "public",
+  "dist",
+  "img",
+  "message",
+  "photo"
+);
+const filePath = path.join(
+  __dirname,
+  "..",
+  "public",
+  "dist",
+  "img",
+  "message",
+  "file"
+);
 
 const addMessage = async (req, res) => {
   try {
     const { sender, receiver, text } = await req.body;
 
-    if (!sender || !receiver || !text) return res.sendStatus(401);
-    let img, message;
+    if (!sender || !receiver) return res.sendStatus(401);
+    let imgs, files;
+    const fileHandler = new FileHandler();
+
+    if (req?.files?.img) {
+      imgs = await fileHandler.createImage(req?.files.img, photoPath, "webp");
+    }
 
     if (req?.files?.file) {
-      if (req.files.file[0].mimetype.split("/")[0] == "image") {
-        img = `/img/file/${req.files.file[0].filename}`;
-      }
+      const filesArray = req?.files?.file.map((file) => {
+        const fileName = file.originalname.split(".")[0];
+        const ext =
+          file.originalname.split(".")[file.originalname.split(".").length - 1];
+        const { location } = fileHandler.createFile(
+          fileName,
+          file.buffer,
+          ext,
+          filePath,
+          "public"
+        );
+        return location;
+      });
+      files = filesArray.join(",");
     }
-    message = await messages.create({
+    const addedMessage = await messages.create({
       sender,
       receiver,
       text,
-      img: img ? img : "",
+      img: imgs ? imgs : "",
+      file: files ? files : "",
     });
 
-    if (!message) return res.sendStatus(401);
+    if (!addedMessage) return res.sendStatus(401);
     res.sendStatus(200);
   } catch (error) {
     console.log("ERROR ADD MESSAGE", error);
@@ -63,6 +101,7 @@ const getMessage = async (req, res) => {
         [Sequelize.literal("TIME(messages.createdAt)"), "time"],
         "text",
         "img",
+        "file",
       ],
       order: [[Sequelize.col("messages.createdAt"), "ASC"]],
     });
@@ -128,7 +167,6 @@ const getUsers = async (req, res) => {
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
     const allUserAvecDoublons = user.map((item) => {
-
       if (item.send.ID_user == req.user) {
         return {
           ID_user: item.receive.ID_user,

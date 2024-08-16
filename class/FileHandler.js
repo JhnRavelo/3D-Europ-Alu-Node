@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
+require("dotenv").config();
 
 class FileHandler {
   constructor() {
@@ -84,9 +85,9 @@ class FileHandler {
     return { fileDir, location, date };
   }
 
-  async createImage(req, imgPath, type) {
+  async createImage(files, imgPath, type) {
     const galleryArray = new Array();
-    const response = req.files.map(async (file) => {
+    const response = files.map(async (file) => {
       if (file.mimetype.split("/")[0] == "image") {
         let webpData = file.buffer;
 
