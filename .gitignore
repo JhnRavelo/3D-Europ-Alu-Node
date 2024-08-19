@@ -1,6 +1,6 @@
 node_modules
 .env
-public/dist
+public
 controllers/refreshTokenController.js
 routes/Refresh.js
 database/config/config.json

@@ -55,18 +55,26 @@ class FileHandler {
   }
 
   createFile(fileName, data, ext, filePath, type) {
-    let name, fileDir, location;
+    let name = Buffer.from(
+        fileName
+          .slice(0, 30)
+          .replace(/,/g, "")
+          .replace(/public/g, ""),
+        "latin1"
+      ).toString("utf8"),
+      fileDir,
+      location;
     const date = `-${this.getDate()}.`;
 
     if (!fs.existsSync(filePath)) {
       fs.mkdirSync(filePath);
     }
     if (type == "tmpApp") {
-      name = fileName + "." + ext;
+      name = name + "." + ext;
       fileDir = filePath;
       location = path.join(filePath, name);
     } else {
-      name = fileName + date + ext;
+      name = name + date + ext;
       fileDir = this.createDirectory(filePath, 0);
       location = path.join(fileDir, name);
 
@@ -85,21 +93,21 @@ class FileHandler {
     return { fileDir, location, date };
   }
 
-  async createImage(files, imgPath, type) {
+  async createImage(files, imgPath, ext, type) {
     const galleryArray = new Array();
     const response = files.map(async (file) => {
       if (file.mimetype.split("/")[0] == "image") {
         let webpData = file.buffer;
 
-        if (type !== "png") {
+        if (ext == "webp") {
           webpData = await sharp(file.buffer).webp().toBuffer();
         }
         const { location } = this.createFile(
           file.originalname.split(".")[0],
           webpData,
-          type,
+          ext,
           imgPath,
-          type == "png" ? type : "public"
+          type
         );
         galleryArray.push(location);
       }
@@ -113,7 +121,7 @@ class FileHandler {
       deleted.split(type).length > 2
         ? deleted.split(type).slice(1).join(type)
         : deleted.split(type)[1];
-    let filePath = path.join(dirPath, location);
+    const filePath = path.join(dirPath, location);
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

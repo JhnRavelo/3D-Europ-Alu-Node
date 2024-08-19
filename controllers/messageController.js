@@ -8,20 +8,12 @@ const photoPath = path.join(
   __dirname,
   "..",
   "public",
-  "dist",
   "img",
   "message",
   "photo"
 );
-const filePath = path.join(
-  __dirname,
-  "..",
-  "public",
-  "dist",
-  "img",
-  "message",
-  "file"
-);
+const filePath = path.join(__dirname, "..", "public", "img", "message", "file");
+const imgPath = path.join(__dirname, "..", "public", "img", "file");
 
 const addMessage = async (req, res) => {
   try {
@@ -32,7 +24,12 @@ const addMessage = async (req, res) => {
     const fileHandler = new FileHandler();
 
     if (req?.files?.img) {
-      imgs = await fileHandler.createImage(req?.files.img, photoPath, "webp");
+      imgs = await fileHandler.createImage(
+        req?.files.img,
+        photoPath,
+        "webp",
+        "public"
+      );
     }
 
     if (req?.files?.file) {
@@ -62,6 +59,7 @@ const addMessage = async (req, res) => {
     if (!addedMessage) return res.sendStatus(401);
     res.sendStatus(200);
   } catch (error) {
+    res.sendStatus(401);
     console.log("ERROR ADD MESSAGE", error);
   }
 };
@@ -105,6 +103,8 @@ const getMessage = async (req, res) => {
       ],
       order: [[Sequelize.col("messages.createdAt"), "ASC"]],
     });
+
+    if (!getMessages) return res.sendStatus(401);
     await messages.update(
       { unRead: false },
       {
@@ -116,6 +116,7 @@ const getMessage = async (req, res) => {
     );
     res.json(getMessages);
   } catch (error) {
+    res.sendStatus(401);
     console.log("ERROR GET MESSAGE", error);
   }
 };
@@ -140,8 +141,11 @@ const getLastMessage = async (req, res) => {
       ],
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
+
+    if (!lastMessages) return res.sendStatus(401);
     res.json(lastMessages);
   } catch (error) {
+    res.sendStatus(401);
     console.log("ERROR GET LAST MESSAGE", error);
   }
 };
@@ -166,6 +170,8 @@ const getUsers = async (req, res) => {
       ],
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
+
+    if (!user) return res.sendStatus(401);
     const allUserAvecDoublons = user.map((item) => {
       if (item.send.ID_user == req.user) {
         return {
@@ -181,9 +187,7 @@ const getUsers = async (req, res) => {
         };
       }
     });
-
     const allUser = [];
-
     const objetsUniques = new Set();
 
     allUserAvecDoublons.forEach((objet) => {
@@ -194,8 +198,11 @@ const getUsers = async (req, res) => {
         allUser.push(objet);
       }
     });
+
+    if (!allUser) return res.sendStatus(401);
     res.json(allUser);
   } catch (error) {
+    res.sendStatus(401);
     console.log("ERROR GET USERS", error);
   }
 };
@@ -223,9 +230,31 @@ const getMessageNotif = async (req, res) => {
       group: ["sender"],
       order: [[Sequelize.col("messages.createdAt"), "DESC"]],
     });
+
+    if (!receiveMessage) return res.sendStatus(401);
     res.json(receiveMessage);
   } catch (error) {
+    res.sendStatus(401);
     console.log("ERROR GET MESSAGE NOTIFICATION", error);
+  }
+};
+
+const downloadFileMessage = async (req, res) => {
+  try {
+    const { file } = await req.body;
+
+    if (!file) return res.sendStatus(401);
+
+    if (file.includes("message/file/")) {
+      res.download(path.join(filePath, file.split("message/file/")[1]));
+    } else if (file.includes("message/photo/")) {
+      res.download(path.join(photoPath, file.split("message/photo/")[1]));
+    } else if (file.includes("/file/")) {
+      res.download(path.join(imgPath, file.split("/file/")[1]));
+    }
+  } catch (error) {
+    res.sendStatus(401);
+    console.log("ERROR DOWNLOAD FILE IN MESSAGE", error);
   }
 };
 
@@ -235,4 +264,5 @@ module.exports = {
   getLastMessage,
   getUsers,
   getMessageNotif,
+  downloadFileMessage,
 };
