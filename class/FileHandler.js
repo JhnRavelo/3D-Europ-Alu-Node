@@ -59,7 +59,8 @@ class FileHandler {
         fileName
           .slice(0, 30)
           .replace(/,/g, "")
-          .replace(/public/g, ""),
+          .replace(/public/g, "")
+          .replace(/ /g, "-"),
         "latin1"
       ).toString("utf8"),
       fileDir,

@@ -3,6 +3,7 @@ const { messages, users } = require("../database/models");
 const { Op, Sequelize } = require("sequelize");
 require("dotenv").config();
 const path = require("path");
+const deleteFileFromMessage = require("../utils/deleteFileFromMessage");
 
 const photoPath = path.join(
   __dirname,
@@ -100,6 +101,7 @@ const getMessage = async (req, res) => {
         "text",
         "img",
         "file",
+        "ID_message",
       ],
       order: [[Sequelize.col("messages.createdAt"), "ASC"]],
     });
@@ -249,12 +251,61 @@ const downloadFileMessage = async (req, res) => {
       res.download(path.join(filePath, file.split("message/file/")[1]));
     } else if (file.includes("message/photo/")) {
       res.download(path.join(photoPath, file.split("message/photo/")[1]));
-    } else if (file.includes("/file/")) {
+    } else if (file.includes("img/file/")) {
       res.download(path.join(imgPath, file.split("/file/")[1]));
     }
   } catch (error) {
     res.sendStatus(401);
     console.log("ERROR DOWNLOAD FILE IN MESSAGE", error);
+  }
+};
+
+const deleteMessage = async (req, res) => {
+  try {
+    const { id, file } = req.body;
+
+    if (!id) return res.sendStatus(401);
+    const deletedMessage = await messages.findOne({
+      where: { ID_message: id },
+    });
+
+    if (!deletedMessage) return res.sendStatus(401);
+    let result;
+    const fileHandler = new FileHandler();
+
+    if (file && file?.includes("message/file/") && deletedMessage?.file) {
+      fileHandler.deleteFileFromDatabase(
+        file,
+        filePath,
+        "message/file/"
+      );
+      result = await deleteFileFromMessage(file, deletedMessage, "file");
+    } else if (
+      file &&
+      (file?.includes("message/photo/") || file?.includes("img/file/")) &&
+      deletedMessage?.img
+    ) {
+      if (file?.includes("message/photo/")) {
+        fileHandler.deleteFileFromDatabase(
+          file,
+          photoPath,
+          "message/photo/"
+        );
+      } else {
+        fileHandler.deleteFileFromDatabase(
+          file,
+          imgPath,
+          "img/file/"
+        );
+      }
+      result = await deleteFileFromMessage(file, deletedMessage, "img");
+    } else result = await deletedMessage.destroy();
+
+    if (!result) return res.sendStatus(401);
+    res.json("message supprimé");
+  } catch (error) {
+    res.sendStatus(401);
+    console.log("ERROR DELETE MESSAGE", error);
   }
 };
 
@@ -265,4 +316,5 @@ module.exports = {
   getUsers,
   getMessageNotif,
   downloadFileMessage,
+  deleteMessage,
 };

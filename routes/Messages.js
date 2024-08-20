@@ -10,6 +10,7 @@ const {
   getUsers,
   getMessageNotif,
   downloadFileMessage,
+  deleteMessage,
 } = require("../controllers/messageController");
 
 const memoryStorage = multer({ storage: multer.memoryStorage() });
@@ -30,5 +31,7 @@ router.get("/getUsers", verifyJWT, getUsers);
 router.get("/getNotif", verifyJWT, getMessageNotif);
 
 router.post("/download", verifyJWT, downloadFileMessage);
+
+router.post("/delete", verifyJWT, deleteMessage);
 
 module.exports = router;
