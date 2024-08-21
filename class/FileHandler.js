@@ -80,11 +80,8 @@ class FileHandler {
       location = path.join(fileDir, name);
 
       if (type == "public") {
-        const publicPath = path.join(fileDir, name).split("public")[1];
-        location = `${process.env.SERVER_PATH}${publicPath.replace(
-          /\\/g,
-          "/"
-        )}`;
+        const publicPath = path.join(fileDir, name).split("dist")[1];
+        location = `${publicPath.replace(/\\/g, "/")}`;
       }
     }
     fs.writeFileSync(path.join(fileDir, name), data, {

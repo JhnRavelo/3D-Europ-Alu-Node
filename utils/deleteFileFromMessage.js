@@ -1,5 +1,3 @@
-const path = require("path");
-
 module.exports = async (file, deletedMessage, data) => {
   let result;
   const files = deletedMessage[data].split(",");

@@ -13,7 +13,7 @@ const app = express();
 
 const server = https.createServer(app);
 
-const io = new Server(server, {cors: {origin: "http://localhost:5173"}});
+const io = new Server(server, { cors: { origin: "http://localhost:5173" } });
 
 io.on("connection", (socket) => {
   socket.on("joinRoom", (data) => {
@@ -42,13 +42,13 @@ users.hasOne(sessions, { foreignKey: "userId" });
 sessions.belongsTo(users, { foreignKey: "userId" });
 
 db.sequelize.options.logging = false;
-db.sequelize.sync({alter: true}).then(() => {
+db.sequelize.sync({ alter: true }).then(() => {
   server.listen(process.env.PORT, () => {
     console.log(`http://127.0.0.1:${process.env.PORT}`);
   });
 });
 
-app.use(express.static("./public/"));
+app.use(express.static("./public/dist/"));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -81,5 +81,5 @@ const messageRoutes = require("./routes/Messages.js");
 app.use("/message", messageRoutes);
 
 app.use((req, res, next) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
 });

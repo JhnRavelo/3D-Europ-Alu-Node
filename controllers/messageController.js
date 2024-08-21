@@ -9,18 +9,30 @@ const photoPath = path.join(
   __dirname,
   "..",
   "public",
+  "dist",
   "img",
   "message",
   "photo"
 );
-const filePath = path.join(__dirname, "..", "public", "img", "message", "file");
-const imgPath = path.join(__dirname, "..", "public", "img", "file");
+const filePath = path.join(
+  __dirname,
+  "..",
+  "public",
+  "dist",
+  "img",
+  "message",
+  "file"
+);
+const imgPath = path.join(__dirname, "..", "public", "dist", "img", "file");
 
 const addMessage = async (req, res) => {
   try {
     const { sender, receiver, text } = await req.body;
 
     if (!sender || !receiver) return res.sendStatus(401);
+
+    if (!req?.files?.img && !req?.files?.file && !text)
+      return res.sendStatus(401);
     let imgs, files;
     const fileHandler = new FileHandler();
 
@@ -274,11 +286,7 @@ const deleteMessage = async (req, res) => {
     const fileHandler = new FileHandler();
 
     if (file && file?.includes("message/file/") && deletedMessage?.file) {
-      fileHandler.deleteFileFromDatabase(
-        file,
-        filePath,
-        "message/file/"
-      );
+      fileHandler.deleteFileFromDatabase(file, filePath, "message/file/");
       result = await deleteFileFromMessage(file, deletedMessage, "file");
     } else if (
       file &&
@@ -286,17 +294,9 @@ const deleteMessage = async (req, res) => {
       deletedMessage?.img
     ) {
       if (file?.includes("message/photo/")) {
-        fileHandler.deleteFileFromDatabase(
-          file,
-          photoPath,
-          "message/photo/"
-        );
+        fileHandler.deleteFileFromDatabase(file, photoPath, "message/photo/");
       } else {
-        fileHandler.deleteFileFromDatabase(
-          file,
-          imgPath,
-          "img/file/"
-        );
+        fileHandler.deleteFileFromDatabase(file, imgPath, "img/file/");
       }
       result = await deleteFileFromMessage(file, deletedMessage, "img");
     } else result = await deletedMessage.destroy();
