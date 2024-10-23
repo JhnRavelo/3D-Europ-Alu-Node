@@ -80,6 +80,9 @@ app.use("/log", logRoutes);
 const messageRoutes = require("./routes/Messages.js");
 app.use("/message", messageRoutes);
 
+const participationRoutes = require("./routes/Participations.js");
+app.use("/participation", participationRoutes);
+
 app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
 });
