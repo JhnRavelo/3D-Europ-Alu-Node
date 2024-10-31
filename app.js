@@ -43,7 +43,14 @@ sessions.belongsTo(users, { foreignKey: "userId" });
 
 db.sequelize.options.logging = false;
 db.sequelize.sync({ alter: true }).then(() => {
-  server.listen(process.env.PORT, () => {
+  server.listen(process.env.PORT, async () => {
+    // await db.prizes.bulkCreate(
+    //   [
+    //     { ID_prize: 1, prize: "goodies", rest: 50 },
+    //     { ID_prize: 2, prize: "objet connecté", rest: 177 },
+    //   ],
+    //   { ignoreDuplicates: true }
+    // );
     console.log(`http://127.0.0.1:${process.env.PORT}`);
   });
 });

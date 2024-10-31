@@ -3,9 +3,9 @@ module.exports = (name, img, prize) => {
   <html>
     <body style="margin: 0; padding: 0; font-family: 'Lato', sans-serif !important;">
       <h3>Cher(e) ${name}</h3>
-      <p style="margin-top: 15px">Nous avons le plaisir de vous annoncer que vous avez participé avec succès à notre jeu et, réussie à gagner ${prize}.</p>
-      <p style="margin-top: 15px">Ce cadeau est notre façon de vous féliciter et de vous remercier pour votre participation. Nous espérons que vous profiterez pleinement de cette opportunité et nous avons hâte de vous revoir dans notre boutique.</p>
-      <p style="margin-top: 15px">Encore félicitations et merci de faire partie de notre communauté !</p>
+      <p style="margin-top: 15px">Nous avons le plaisir de vous annoncer que vous faites partie de nos heureux gagnants ! Grâce à votre participation à notre jeu, vous avez remporté ${prize} 🎁.</p>
+      <p style="margin-top: 15px">C’est notre façon de vous remercier et de vous féliciter pour votre engagement. Nous espérons que cette remise vous permettra de profiter encore plus de nos produits et services. Au plaisir de vous accueillir prochainement en boutique et de partager de nouvelles opportunités avec vous.</p>
+      <p style="margin-top: 15px">Merci d'être un membre précieux de notre communauté ! 🙏</p>
       <p style="margin-top: 20px">Cordialement,</p>
       <p style="margin-top: 15px">Équipe Marketing d'Europ'Alu</p>
       <table
@@ -14,7 +14,7 @@ module.exports = (name, img, prize) => {
       >
         <tr>
           <td align="center">
-            <img src="https://3d.europ-alu.com${img}" width="400px"/>
+            <img src="https://3d.europ-alu.com${img}" width="300px"/>
           </td>
         </tr>
       </table>

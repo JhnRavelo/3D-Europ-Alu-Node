@@ -1,4 +1,4 @@
-const { participations } = require("../database/models");
+const { participations, prizes } = require("../database/models");
 const { Op } = require("sequelize");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -77,11 +77,17 @@ const getParticipation = async (req, res) => {
 
 const addParticipationPrize = async (req, res) => {
   try {
-    const { prize, img } = await req.body;
+    const { prize, img, gift } = await req.body;
     const partGame = await req.cookies?.partGame;
 
-    if (!prize || !partGame)
+    if (!prize || !partGame || !gift)
       return res.json({ success: false, message: "Donnée non remplie" });
+    const isPrize = await prizes.findOne({ where: { prize: gift } });
+
+    if (isPrize) {
+      isPrize.rest = isPrize.rest - 1;
+      await isPrize.save();
+    }
     getParticipationJWT(partGame, res, prize, img);
   } catch (error) {
     res.json({ success: false, message: "Erreur serveur introuvable" });
@@ -89,4 +95,21 @@ const addParticipationPrize = async (req, res) => {
   }
 };
 
-module.exports = { addParticipation, getParticipation, addParticipationPrize };
+const getPrize = async (req, res) => {
+  try {
+    const allPrizes = await prizes.findAll();
+
+    if (!allPrizes) res.sendStatus(403);
+    res.json(allPrizes);
+  } catch (error) {
+    res.sendStatus(401);
+    console.log("ERROR GET ALL PRIZES", error);
+  }
+};
+
+module.exports = {
+  addParticipation,
+  getParticipation,
+  addParticipationPrize,
+  getPrize,
+};
